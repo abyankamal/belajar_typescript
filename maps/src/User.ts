@@ -1,7 +1,5 @@
 import { faker } from "@faker-js/faker";
 
-export const udud = 'udud';
-
 export class User {
     name : string
     location : {
