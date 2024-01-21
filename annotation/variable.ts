@@ -1,5 +1,5 @@
 const angka : number = 5;
-const huruf : string = "iiii";
+const huruf : string = "aaaa";
 const cariBoolean : boolean = false;
 const nothingMuch : null = null;
 const nothing : undefined = undefined;
