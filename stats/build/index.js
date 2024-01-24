@@ -1,22 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const CsvFileReader_1 = require("./CsvFileReader");
 const MatchReader_1 = require("./MatchReader");
-const MatchResult_1 = require("./MatchResult");
+const Summary_1 = require("./Summary");
 // using inheritance
 // const reader= new MatchReader('football.csv');
 // reader.read();
 // using composition
-const csvFileReader = new CsvFileReader_1.CsvFileReader('football.csv');
-const matchReader = new MatchReader_1.MatchReader(csvFileReader);
+// const csvFileReader = new CsvFileReader('football.csv');
+// const matchReader = new MatchReader(csvFileReader);
+// matchReader.load()
+const matchReader = MatchReader_1.MatchReader.fromCsv('football.csv');
 matchReader.load();
-let manUnitedWins = 0;
-for (let match of matchReader.matches) {
-    if (match[1] === 'Man United' && match[5] === MatchResult_1.MatchResult.HomeWin) {
-        manUnitedWins++;
-    }
-    else if ((match[2] === 'Man United' && match[5] === MatchResult_1.MatchResult.AwayWin)) {
-        manUnitedWins++;
-    }
-}
-console.log(`Man United won ${manUnitedWins} games`);
+const summary = Summary_1.Summary.winsAnaysisWithHtmlReport('Man United');
+summary.buildAndPrintReport(matchReader.matches);
