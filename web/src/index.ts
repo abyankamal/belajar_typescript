@@ -2,7 +2,12 @@ import { User } from "./models/User";
 
 const user = new User({name: "John", age: 28});
 
-user.set({"age": 38});
+user.on("change", () => {
+    console.log("Change 1");
+});
 
-console.log(user.get('name'));
-console.log(user.get('age'));
+user.on("change", () => {
+    console.log("Change 2");
+});
+
+user.trigger("change");
