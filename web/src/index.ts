@@ -1,9 +1,13 @@
 import { User } from "./models/User";
 
-const user = new User({id: "a969"});
+const user = new User({});
 
-user.fetch();
+user.events.on('change', () => {
+    console.log('trigger');
+});
+
+user.events.trigger('change');
 
 setTimeout(() => {
     console.log(user);
-}, 5000);
+}, 1000);
