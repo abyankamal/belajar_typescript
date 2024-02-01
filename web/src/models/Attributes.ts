@@ -1,15 +1,21 @@
 export class Attributes<T extends object> {
-    private data: T; // Make 'data' private to ensure encapsulation
+    // private data: T; // Make 'data' private to ensure encapsulation
   
-    constructor(data: T) {
-      this.data = data;
-    }
+    // constructor(data: T) {
+    //   this.data = data;
+    // }
+
+    constructor(private data: T) {}
   
-    get<K extends keyof T>(key: K): T[K] {
+    get = <K extends keyof T>(key: K): T[K]  => {
       return this.data[key]; // Use 'keyof T' to ensure type safety for keys
     }
   
-    set<K extends keyof T>(key: K, value: T[K]): void {
-      this.data[key] = value; // Update specific key with type-checked value
+    set(update: T): void {
+      Object.assign(this.data, update);
+    }
+
+    getAll() {
+      return this.data;
     }
   }
