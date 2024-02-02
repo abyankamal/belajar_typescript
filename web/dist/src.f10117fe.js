@@ -5486,7 +5486,7 @@ exports.isCancel = isCancel;
 exports.CanceledError = CanceledError;
 exports.AxiosError = AxiosError;
 exports.Axios = Axios;
-},{"./lib/axios.js":"node_modules/axios/lib/axios.js"}],"src/models/Sync.ts":[function(require,module,exports) {
+},{"./lib/axios.js":"node_modules/axios/lib/axios.js"}],"src/models/ApiSync.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -5497,17 +5497,17 @@ var __importDefault = this && this.__importDefault || function (mod) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Sync = void 0;
+exports.ApiSync = void 0;
 var axios_1 = __importDefault(require("axios"));
-var Sync = /** @class */function () {
-  function Sync(rootUrl) {
+var ApiSync = /** @class */function () {
+  function ApiSync(rootUrl) {
     this.rootUrl = rootUrl;
   }
   ;
-  Sync.prototype.fetch = function (id) {
+  ApiSync.prototype.fetch = function (id) {
     return axios_1.default.get("".concat(this.rootUrl, "/").concat(id));
   };
-  Sync.prototype.save = function (data) {
+  ApiSync.prototype.save = function (data) {
     var id = data.id;
     if (id) {
       return axios_1.default.put("".concat(this.rootUrl, "/").concat(id), data);
@@ -5515,52 +5515,36 @@ var Sync = /** @class */function () {
       return axios_1.default.post(this.rootUrl, data);
     }
   };
-  return Sync;
+  return ApiSync;
 }();
-exports.Sync = Sync;
-},{"axios":"node_modules/axios/index.js"}],"src/models/User.ts":[function(require,module,exports) {
+exports.ApiSync = ApiSync;
+},{"axios":"node_modules/axios/index.js"}],"src/models/Model.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.User = void 0;
-var Attributes_1 = require("./Attributes");
-var Eventing_1 = require("./Eventing");
-var Sync_1 = require("./Sync");
-var rootUrl = "http://localhost/3000/users";
-var User = /** @class */function () {
-  function User(attrs) {
-    this.events = new Eventing_1.Eventing();
-    this.sync = new Sync_1.Sync(rootUrl);
-    this.attributes = new Attributes_1.Attributes(attrs);
+exports.Model = void 0;
+var Model = /** @class */function () {
+  function Model(attributes, sync, events) {
+    this.attributes = attributes;
+    this.sync = sync;
+    this.events = events;
+    this.on = this.events.on;
+    this.trigger = this.events.trigger;
   }
-  Object.defineProperty(User.prototype, "on", {
-    get: function get() {
-      return this.events.on;
-    },
-    enumerable: false,
-    configurable: true
-  });
-  Object.defineProperty(User.prototype, "trigger", {
-    get: function get() {
-      return this.events.trigger;
-    },
-    enumerable: false,
-    configurable: true
-  });
-  Object.defineProperty(User.prototype, "get", {
+  Object.defineProperty(Model.prototype, "get", {
     get: function get() {
       return this.attributes.get;
     },
     enumerable: false,
     configurable: true
   });
-  User.prototype.set = function (update) {
+  Model.prototype.set = function (update) {
     this.attributes.set(update);
     this.events.trigger('change');
   };
-  User.prototype.fetch = function () {
+  Model.prototype.fetch = function () {
     var _this = this;
     var id = this.get('id');
     if (typeof id !== 'number' && typeof id !== 'string') {
@@ -5570,7 +5554,7 @@ var User = /** @class */function () {
       _this.set(response.data);
     });
   };
-  User.prototype.save = function () {
+  Model.prototype.save = function () {
     var _this = this;
     this.sync.save(this.attributes.getAll()).then(function (response) {
       _this.trigger('save');
@@ -5578,26 +5562,64 @@ var User = /** @class */function () {
       _this.trigger('error');
     });
   };
-  return User;
+  return Model;
 }();
+exports.Model = Model;
+},{}],"src/models/User.ts":[function(require,module,exports) {
+"use strict";
+
+var __extends = this && this.__extends || function () {
+  var _extendStatics = function extendStatics(d, b) {
+    _extendStatics = Object.setPrototypeOf || {
+      __proto__: []
+    } instanceof Array && function (d, b) {
+      d.__proto__ = b;
+    } || function (d, b) {
+      for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p];
+    };
+    return _extendStatics(d, b);
+  };
+  return function (d, b) {
+    if (typeof b !== "function" && b !== null) throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+    _extendStatics(d, b);
+    function __() {
+      this.constructor = d;
+    }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+  };
+}();
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.User = void 0;
+var Attributes_1 = require("./Attributes");
+var Eventing_1 = require("./Eventing");
+var ApiSync_1 = require("./ApiSync");
+var Model_1 = require("./Model");
+var rootUrl = "http://localhost:3000/users";
+var User = /** @class */function (_super) {
+  __extends(User, _super);
+  function User() {
+    return _super !== null && _super.apply(this, arguments) || this;
+  }
+  User.buildUser = function (attrs) {
+    return new User(new Attributes_1.Attributes(attrs), new ApiSync_1.ApiSync(rootUrl), new Eventing_1.Eventing());
+  };
+  return User;
+}(Model_1.Model);
 exports.User = User;
-},{"./Attributes":"src/models/Attributes.ts","./Eventing":"src/models/Eventing.ts","./Sync":"src/models/Sync.ts"}],"src/index.ts":[function(require,module,exports) {
+},{"./Attributes":"src/models/Attributes.ts","./Eventing":"src/models/Eventing.ts","./ApiSync":"src/models/ApiSync.ts","./Model":"src/models/Model.ts"}],"src/index.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 var User_1 = require("./models/User");
-var user = new User_1.User({
-  id: "1",
-  name: "John",
-  age: 0
+var user = User_1.User.buildUser({
+  id: "1"
 });
-user.on("change", function () {
-  console.log(user);
-});
-user.trigger("change");
 user.fetch();
+console.log(user);
 },{"./models/User":"src/models/User.ts"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -5623,7 +5645,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61152" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62876" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
