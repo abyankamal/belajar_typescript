@@ -140,7 +140,7 @@ var Model = /** @class */function () {
   Model.prototype.fetch = function () {
     var _this = this;
     var id = this.get('id');
-    if (typeof id !== 'number') {
+    if (typeof id !== 'number' || typeof id !== 'string') {
       throw new Error('Cannot fetch without an id');
     }
     this.sync.fetch(id).then(function (response) {
@@ -5659,48 +5659,29 @@ var User = /** @class */function (_super) {
   return User;
 }(Model_1.Model);
 exports.User = User;
-},{"./Model":"src/models/Model.ts","./Attributes":"src/models/Attributes.ts","./ApiSync":"src/models/ApiSync.ts","./Eventing":"src/models/Eventing.ts","./Collection":"src/models/Collection.ts"}],"src/views/UserForm.ts":[function(require,module,exports) {
+},{"./Model":"src/models/Model.ts","./Attributes":"src/models/Attributes.ts","./ApiSync":"src/models/ApiSync.ts","./Eventing":"src/models/Eventing.ts","./Collection":"src/models/Collection.ts"}],"src/views/View.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.UserForm = void 0;
-var UserForm = /** @class */function () {
-  function UserForm(parent, model) {
-    var _this = this;
+exports.View = void 0;
+var View = /** @class */function () {
+  function View(parent, model) {
     this.parent = parent;
     this.model = model;
-    this.onSetChangeName = function () {
-      var input = _this.parent.querySelector('input');
-      if (input) {
-        var name = input.value;
-        _this.model.set({
-          name: name
-        });
-      }
-    };
-    this.onSetAgeRandom = function () {
-      _this.model.setRandomAge();
-    };
     this.bindModel();
   }
-  UserForm.prototype.bindModel = function () {
+  View.prototype.eventsMap = function () {
+    return {};
+  };
+  View.prototype.bindModel = function () {
     var _this = this;
     this.model.on('change', function () {
       _this.render();
     });
   };
-  UserForm.prototype.eventsMap = function () {
-    return {
-      "click:.set-name": this.onSetChangeName,
-      "click:.set-age": this.onSetAgeRandom
-    };
-  };
-  UserForm.prototype.template = function () {
-    return "\n      <div>\n        <h1>User Form</h1>\n        <div>Name : ".concat(this.model.get('name'), "</div>\n        <div>Name : ").concat(this.model.get('age'), "</div>\n        <input />\n        <button class=\"set-name\">Click Me</button>\n        <button class=\"set-age\">Set Random Age</button>\n      </div>\n    ");
-  };
-  UserForm.prototype.bindEvents = function (fragment) {
+  View.prototype.bindEvents = function (fragment) {
     var eventsMap = this.eventsMap();
     var _loop_1 = function _loop_1(eventkey) {
       var _a = eventkey.split(':'),
@@ -5714,17 +5695,79 @@ var UserForm = /** @class */function () {
       _loop_1(eventkey);
     }
   };
-  UserForm.prototype.render = function () {
+  View.prototype.render = function () {
     this.parent.innerHTML = '';
     var templateElement = document.createElement('template');
     templateElement.innerHTML = this.template();
     this.bindEvents(templateElement.content);
     this.parent.append(templateElement.content);
   };
-  return UserForm;
+  return View;
 }();
+exports.View = View;
+},{}],"src/views/UserForm.ts":[function(require,module,exports) {
+"use strict";
+
+var __extends = this && this.__extends || function () {
+  var _extendStatics = function extendStatics(d, b) {
+    _extendStatics = Object.setPrototypeOf || {
+      __proto__: []
+    } instanceof Array && function (d, b) {
+      d.__proto__ = b;
+    } || function (d, b) {
+      for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p];
+    };
+    return _extendStatics(d, b);
+  };
+  return function (d, b) {
+    if (typeof b !== "function" && b !== null) throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+    _extendStatics(d, b);
+    function __() {
+      this.constructor = d;
+    }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+  };
+}();
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.UserForm = void 0;
+var View_1 = require("./View");
+var UserForm = /** @class */function (_super) {
+  __extends(UserForm, _super);
+  function UserForm() {
+    var _this = _super !== null && _super.apply(this, arguments) || this;
+    _this.onSetSaveName = function () {
+      _this.model.save();
+    };
+    _this.onSetChangeName = function () {
+      var input = _this.parent.querySelector('input');
+      if (input) {
+        var name = input.value;
+        _this.model.set({
+          name: name
+        });
+      }
+    };
+    _this.onSetAgeRandom = function () {
+      _this.model.setRandomAge();
+    };
+    return _this;
+  }
+  UserForm.prototype.eventsMap = function () {
+    return {
+      "click:.set-name": this.onSetChangeName,
+      "click:.set-age": this.onSetAgeRandom,
+      "click:.set-save": this.onSetSaveName
+    };
+  };
+  UserForm.prototype.template = function () {
+    return "\n      <div>\n        <input placeholder=\"".concat(this.model.get('name'), "\" />\n        <button class=\"set-name\">Click Me</button>\n        <button class=\"set-age\">Set Random Age</button>\n        <button class=\"set-save\">Save Name</button>\n      </div>\n    ");
+  };
+  return UserForm;
+}(View_1.View);
 exports.UserForm = UserForm;
-},{}],"src/index.ts":[function(require,module,exports) {
+},{"./View":"src/views/View.ts"}],"src/index.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5766,7 +5809,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59878" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58990" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
