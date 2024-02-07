@@ -7,7 +7,7 @@ interface ModelAttributes<T> {
 }
 
 interface Sync<T> {
-  fetch(id: number | string): AxiosPromise;
+  fetch(id: number): AxiosPromise;
   save(data: T): AxiosPromise;
 }
 
@@ -17,7 +17,7 @@ interface Events {
 }
 
 export interface HasId {
-  id?: number | string;
+  id?: number;
 }
 
 export class Model<T extends HasId> {
@@ -39,25 +39,21 @@ export class Model<T extends HasId> {
   fetch(): void {
     const id = this.get('id');
 
-    if (typeof id !== 'number' || typeof id !== 'string') {
+    if (typeof id !== 'number') {
       throw new Error('Cannot fetch without an id');
     }
 
-    this.sync.fetch(id).then(
-      (response: AxiosResponse): void => {
-        this.set(response.data);
-      }
-    );
+    this.sync.fetch(id).then((response: AxiosResponse): void => {
+      this.set(response.data);
+    });
   }
 
   save(): void {
     this.sync
       .save(this.attributes.getAll())
-      .then(
-        (response: AxiosResponse): void => {
-          this.trigger('save');
-        }
-      )
+      .then((response: AxiosResponse): void => {
+        this.trigger('save');
+      })
       .catch(() => {
         this.trigger('error');
       });
