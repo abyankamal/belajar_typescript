@@ -5,7 +5,7 @@ var Methods;
 (function (Methods) {
     Methods["get"] = "get";
     Methods["post"] = "post";
-    Methods["put"] = "put";
-    Methods["delete"] = "delete";
     Methods["patch"] = "patch";
+    Methods["del"] = "delete";
+    Methods["put"] = "put";
 })(Methods || (exports.Methods = Methods = {}));
